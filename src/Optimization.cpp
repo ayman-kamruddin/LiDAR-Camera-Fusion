@@ -4,7 +4,7 @@
 
 Eigen::Matrix4d Optimization::run(const std::vector<Eigen::Vector4d>& lidarPlanes,
                                   const std::vector<Eigen::Vector4d>& cameraPlanes) {
-    if (lidarPlanes.size() != cameraPlanes.size()) {
+    if (!validateNumberOfPlanes(lidarPlanes, cameraPlanes)) {
         throw std::runtime_error("Mismatch between the number of LiDAR and camera planes.");
     }
 
@@ -70,4 +70,9 @@ Eigen::Vector3d Optimization::optimizeTranslation(const std::vector<Eigen::Vecto
 
     Eigen::Vector3d translation = A.colPivHouseholderQr().solve(b);
     return translation;
+}
+
+bool Optimization::validateNumberOfPlanes(const std::vector<Eigen::Vector4d>& lidarPlanes,
+                                          const std::vector<Eigen::Vector4d>& cameraPlanes) {
+    return lidarPlanes.size() == cameraPlanes.size();
 }

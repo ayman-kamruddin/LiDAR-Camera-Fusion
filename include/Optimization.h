@@ -16,6 +16,9 @@ private:
     static Eigen::Vector3d optimizeTranslation(const std::vector<Eigen::Vector4d>& lidarPlanes,
                                                const std::vector<Eigen::Vector4d>& cameraPlanes,
                                                const Eigen::Matrix3d& rotation);
+
+    static bool validateNumberOfPlanes(const std::vector<Eigen::Vector4d>& lidarPlanes,
+                                       const std::vector<Eigen::Vector4d>& cameraPlanes);
 };
 
 #endif // OPTIMIZATION_H

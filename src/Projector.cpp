@@ -47,6 +47,9 @@ void Projector::projectLidarToImage(const std::string& cloudFile,
     std::vector<cv::Point2f> imagePoints;
     cv::projectPoints(lidarPoints, rvec, T, cameraMatrix, distCoeffs, imagePoints);
 
+    // Validate the projected points
+    validateProjectedPoints(imagePoints, image.cols, image.rows);
+
     // Draw the projected points on the image
     cv::Mat outputImage = image.clone();
     for (const auto& point : imagePoints) {
@@ -106,6 +109,9 @@ void Projector::projectLidarToImageAndColorize(const std::string& cloudFile,
     std::vector<cv::Point2f> imagePoints;
     cv::projectPoints(lidarPoints, rvec, T, cameraMatrix, distCoeffs, imagePoints);
 
+    // Validate the projected points
+    validateProjectedPoints(imagePoints, image.cols, image.rows);
+
     // Create a new colored point cloud
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr coloredCloud(new pcl::PointCloud<pcl::PointXYZRGB>());
 
@@ -138,5 +144,14 @@ void Projector::projectLidarToImageAndColorize(const std::string& cloudFile,
         std::cerr << "Failed to save colored point cloud." << std::endl;
     } else {
         std::cout << "Colored point cloud saved as colored_pointcloud.pcd" << std::endl;
+    }
+}
+
+void Projector::validateProjectedPoints(std::vector<cv::Point2f>& points, int imageWidth, int imageHeight) {
+    for (auto& point : points) {
+        if (point.x < 0) point.x = 0;
+        if (point.x >= imageWidth) point.x = imageWidth - 1;
+        if (point.y < 0) point.y = 0;
+        if (point.y >= imageHeight) point.y = imageHeight - 1;
     }
 }

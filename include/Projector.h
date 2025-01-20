@@ -20,6 +20,9 @@ public:
                                                const Eigen::Matrix4d& transformation,
                                                const cv::Mat& cameraMatrix,
                                                const cv::Mat& distCoeffs);
+
+    // Validates the projected points to ensure they fall within the image boundaries
+    static void validateProjectedPoints(std::vector<cv::Point2f>& points, int imageWidth, int imageHeight);
 };
 
 #endif // PROJECTOR_H

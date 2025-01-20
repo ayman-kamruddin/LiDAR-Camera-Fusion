@@ -11,6 +11,7 @@ public:
                  bool debugMode, const cv::Mat& cameraMatrix, const cv::Mat& distCoeffs);
 
     Eigen::Vector4d extractPlane(const std::string& imagePath);
+    bool validateExtractedPlane(const Eigen::Vector4d& plane); // Function to validate the extracted plane
 
 private:
     int checkerboardRows_;
