@@ -8,6 +8,10 @@ Eigen::Matrix4d Optimization::run(const std::vector<Eigen::Vector4d>& lidarPlane
         throw std::runtime_error("Mismatch between the number of LiDAR and camera planes.");
     }
 
+    if (lidarPlanes.size() < 3 || cameraPlanes.size() < 3) {
+        throw std::runtime_error("Not enough valid planes for optimization. At least 3 planes are required.");
+    }
+
     // Step 1: Optimize rotation matrix
     Eigen::Matrix3d rotation = optimizeRotation(lidarPlanes, cameraPlanes);
 

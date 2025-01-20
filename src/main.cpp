@@ -61,6 +61,19 @@ bool calibrateCamera(const std::vector<std::string>& imageFiles, int checkerboar
     std::cout << "Camera Matrix:\n" << cameraMatrix << std::endl;
     std::cout << "Distortion Coefficients:\n" << distCoeffs.t() << std::endl;
 
+    // Verify the accuracy of the calibration parameters
+    double totalError = 0.0;
+    int totalPoints = 0;
+    for (size_t i = 0; i < objectPoints.size(); ++i) {
+        std::vector<cv::Point2f> projectedPoints;
+        cv::projectPoints(objectPoints[i], rvecs[i], tvecs[i], cameraMatrix, distCoeffs, projectedPoints);
+        double error = cv::norm(imagePoints[i], projectedPoints, cv::NORM_L2);
+        totalError += error * error;
+        totalPoints += objectPoints[i].size();
+    }
+    double meanError = std::sqrt(totalError / totalPoints);
+    std::cout << "Mean reprojection error: " << meanError << std::endl;
+
     return true;
 }
 
