@@ -10,12 +10,15 @@
 
 CloudHandler::CloudHandler(double min_bound_x, double min_bound_y, double min_bound_z,
                            double max_bound_x, double max_bound_y, double max_bound_z,
-                           double plane_ransac_thresh, int plane_min_points, bool debug)
+                           double plane_ransac_thresh, int plane_min_points, bool debug,
+                           double cluster_tolerance, double bounding_box_tolerance)
     : min_bound_(min_bound_x, min_bound_y, min_bound_z),
       max_bound_(max_bound_x, max_bound_y, max_bound_z),
       plane_ransac_thresh_(plane_ransac_thresh),
       plane_min_points_(plane_min_points),
-      debug_(debug) {}
+      debug_(debug),
+      cluster_tolerance_(cluster_tolerance),
+      bounding_box_tolerance_(bounding_box_tolerance) {}
 
 Eigen::Vector4d CloudHandler::extractPlane(const std::string& cloudFile) {
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
@@ -55,7 +58,7 @@ Eigen::Vector4d CloudHandler::extractPlane(const std::string& cloudFile) {
 
     std::vector<pcl::PointIndices> clusterIndices;
     pcl::EuclideanClusterExtraction<pcl::PointXYZ> ec;
-    ec.setClusterTolerance(0.2); // Adjust as needed
+    ec.setClusterTolerance(cluster_tolerance_); // Adjust as needed
     ec.setMinClusterSize(100);   // Minimum number of points per cluster
     ec.setMaxClusterSize(100000); // Maximum number of points per cluster
     ec.setSearchMethod(tree);
@@ -70,7 +73,6 @@ Eigen::Vector4d CloudHandler::extractPlane(const std::string& cloudFile) {
     // Select the largest valid cluster
     pcl::PointCloud<pcl::PointXYZ>::Ptr selectedCluster(new pcl::PointCloud<pcl::PointXYZ>());
     size_t maxClusterSize = 0;
-    double tol = 0.3; // Bounding box tolerance
 
     for (const auto& indices : clusterIndices) {
         pcl::PointCloud<pcl::PointXYZ>::Ptr cluster(new pcl::PointCloud<pcl::PointXYZ>());
@@ -85,8 +87,8 @@ Eigen::Vector4d CloudHandler::extractPlane(const std::string& cloudFile) {
         double extentY = maxPt.y - minPt.y;
         double extentZ = maxPt.z - minPt.z;
 
-        // Check each dimension is <= 1.2 + tol
-        if (extentX <= (1.2 + tol) && extentY <= (1.2 + tol) && extentZ <= (1.2 + tol)) {
+        // Check each dimension is <= 1.2 + bounding_box_tolerance_
+        if (extentX <= (1.2 + bounding_box_tolerance_) && extentY <= (1.2 + bounding_box_tolerance_) && extentZ <= (1.2 + bounding_box_tolerance_)) {
             if (cluster->points.size() > maxClusterSize) {
                 selectedCluster = cluster;
                 maxClusterSize = cluster->points.size();

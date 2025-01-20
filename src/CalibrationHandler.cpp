@@ -21,28 +21,21 @@ void CalibrationHandler::run() {
     std::vector<Eigen::Vector4d> cameraPlanes;
     std::vector<Eigen::Vector4d> lidarPlanes;
 
-
-    // create a progress bar
     for (size_t i = 0; i < imageFiles_.size(); ++i) {
-        // print processing pair _ of _
-        std::cout << "Processing pair " << i+1 << " of " << imageFiles_.size() << std::endl;
+        std::cout << "Processing pair " << i + 1 << " of " << imageFiles_.size() << std::endl;
 
-        // make sure that filenames match. igore directory prefix and file extension
-        std::string imageFile = imageFiles_[i].substr(imageFiles_[i].find_last_of("/\\") + 1);
-        std::string cloudFile = cloudFiles_[i].substr(cloudFiles_[i].find_last_of("/\\") + 1);
-        imageFile = imageFile.substr(0, imageFile.find_last_of("."));
-        cloudFile = cloudFile.substr(0, cloudFile.find_last_of("."));
+        std::string imageFile = extractFilenameWithoutDirectoryAndExtension(imageFiles_[i]);
+        std::string cloudFile = extractFilenameWithoutDirectoryAndExtension(cloudFiles_[i]);
+
         if (imageFile != cloudFile) {
             std::cerr << "Image and cloud file names do not match for pair: " << imageFiles_[i]
                       << " and " << cloudFiles_[i] << std::endl;
             continue;
         }
 
-        // Extract planes
         Eigen::Vector4d cameraPlane = imageHandler_.extractPlane(imageFiles_[i]);
         Eigen::Vector4d lidarPlane = cloudHandler_.extractPlane(cloudFiles_[i]);
 
-        // Validate extracted planes
         if (cameraPlane.isZero() || lidarPlane.isZero()) {
             std::cerr << "Failed to extract valid planes for pair: " << imageFiles_[i]
                       << " and " << cloudFiles_[i] << std::endl;
@@ -53,21 +46,17 @@ void CalibrationHandler::run() {
         lidarPlanes.push_back(lidarPlane);
     }
 
-    // Check if there are enough planes for optimization
     if (cameraPlanes.size() < 3 || lidarPlanes.size() < 3) {
         std::cerr << "Not enough valid planes for optimization. Calibration aborted." << std::endl;
         return;
     }
 
-    // Perform optimization to compute the transformation matrix
     try {
         transformation_ = Optimization::run(lidarPlanes, cameraPlanes);
 
-        // Output the computed transformation matrix
         std::cout << "Calibration completed successfully!" << std::endl;
         std::cout << "Computed transformation matrix (LiDAR to Camera):\n" << transformation_ << std::endl;
 
-        // Save the transformation matrix to a file
         saveTransformationMatrix("transformation.yaml");
     } catch (const std::exception& e) {
         std::cerr << "Error during optimization: " << e.what() << std::endl;
@@ -95,4 +84,9 @@ void CalibrationHandler::saveTransformationMatrix(const std::string& filePath) c
     } else {
         std::cerr << "Failed to save transformation matrix to " << filePath << std::endl;
     }
+}
+
+std::string CalibrationHandler::extractFilenameWithoutDirectoryAndExtension(const std::string& filepath) {
+    std::string filename = filepath.substr(filepath.find_last_of("/\\") + 1);
+    return filename.substr(0, filename.find_last_of("."));
 }

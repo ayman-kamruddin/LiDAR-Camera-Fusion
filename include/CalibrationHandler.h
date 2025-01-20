@@ -18,6 +18,7 @@ public:
     void run();
     Eigen::Matrix4d getTransformationMatrix() const; // Getter for transformation matrix
     void saveTransformationMatrix(const std::string& filePath) const; // Save transformation matrix
+    std::string extractFilenameWithoutDirectoryAndExtension(const std::string& filepath); // Extract filename without directory and extension
 
 private:
     std::vector<std::string> imageFiles_;
