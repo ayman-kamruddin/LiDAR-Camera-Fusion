@@ -1,4 +1,4 @@
-# Lidar-Camera Calibration
+# LiDAR-Camera Calibration
 
 This repository provides a tool for calibrating a LiDAR sensor with a camera. The calibration process involves finding the transformation matrix that aligns the LiDAR point cloud with the camera image. This is useful for applications such as sensor fusion, autonomous driving, and robotics.
 
@@ -90,7 +90,3 @@ Contributions are welcome! Please follow these guidelines:
 5. Create a pull request to the main repository.
 
 For any issues or questions, please open an issue on GitHub.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
