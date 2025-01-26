@@ -26,19 +26,20 @@ The project requires the following libraries:
    git clone https://github.com/ayman-kamruddin/LiDAR-Camera-Fusion.git
    cd LiDAR-Camera-Fusion
    ```
+2. Make sure that the checkerboard features and filter dimensions are implemented correctly in the .cpp files, which you should review before running. Also change CMakeLists.txt according to your system setup,
 
-2. Create a build directory and navigate to it:
+3. Create a build directory and navigate to it:
    ```sh
    mkdir build
    cd build
    ```
 
-3. Run CMake to configure the project:
+4. Run CMake to configure the project:
    ```sh
    cmake ..
    ```
 
-4. Build the project:
+5. Build the project:
    ```sh
    make
    ```
