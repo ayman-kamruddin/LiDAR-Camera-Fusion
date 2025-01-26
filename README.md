@@ -49,11 +49,13 @@ The project requires the following libraries:
 1. Prepare your calibration data:
    - Place your checkerboard images in a directory named `images`.
    - Place your corresponding LiDAR point clouds in a directory named `pointclouds`.
+   Make sure corresponding image-pointcloud pairs have the same filename.
 
 2. Run the calibration:
    ```sh
    ./lidar_camera_calibration <path_to_calibration_data>
    ```
+   where your calibration data directory should contain the `images` and the `pointclouds` folders that you'd just created in step 1.
 
 3. The transformation matrix will be saved to `transformation.yaml`.
 
