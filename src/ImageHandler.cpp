@@ -26,7 +26,9 @@ Eigen::Vector4d ImageHandler::extractPlane(const std::string& imagePath) {
 
     if (!found) {
         std::cerr << "Checkerboard pattern not found in image: " << imagePath << std::endl;
+        
         return Eigen::Vector4d::Zero();
+
     }
 
     // Refine corner locations
