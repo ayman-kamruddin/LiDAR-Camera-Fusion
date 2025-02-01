@@ -152,7 +152,7 @@ int main(int argc, char** argv) {
         }
 
 
-        CalibrationHandler calibrationHandler(imageFiles, cloudFiles, cameraMatrix, distCoeffs);
+        CalibrationHandler calibrationHandler(imageFiles, cloudFiles, cameraMatrix, distCoeffs, checkerboardRows, checkerboardCols, checkerboardSize);
         calibrationHandler.run();
 
         // Load the transformation matrix

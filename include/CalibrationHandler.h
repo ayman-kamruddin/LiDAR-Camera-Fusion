@@ -13,7 +13,8 @@ public:
     CalibrationHandler(const std::vector<std::string>& imageFiles,
                        const std::vector<std::string>& cloudFiles,
                        const cv::Mat& cameraMatrix,
-                       const cv::Mat& distCoeffs);
+                       const cv::Mat& distCoeffs,
+                       int checkerboardRows, int checkerboardCols, float checkerboardSize);
 
     void run();
     Eigen::Matrix4d getTransformationMatrix() const; // Getter for transformation matrix
