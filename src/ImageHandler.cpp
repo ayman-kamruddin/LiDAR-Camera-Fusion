@@ -76,6 +76,11 @@ Eigen::Vector4d ImageHandler::extractPlane(const std::string& imagePath) {
     return plane;
 }
 
+bool ImageHandler::validateExtractedPlane(const Eigen::Vector4d& plane) {
+    // Check if the plane is valid (non-zero)
+    return !plane.isZero();
+}
+
 bool ImageHandler::calibrateCamera(const std::vector<std::string>& imageFiles, int checkerboardRows, int checkerboardCols, float checkerboardSize) {
     std::vector<std::vector<cv::Point2f>> imagePoints;
     std::vector<std::vector<cv::Point3f>> objectPoints;

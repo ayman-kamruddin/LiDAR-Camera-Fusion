@@ -45,6 +45,15 @@ void CalibrationHandler::run() {
             continue;
         }
 
+        // Add validation for extracted plane
+        if (!imageHandler_.validateExtractedPlane(cameraPlane)) {
+            std::cerr << "Invalid camera plane extracted for image: " << imageFiles_[i] << std::endl;
+            continue;
+        }
+
+        // Add debug output for extracted plane
+        std::cout << "Extracted camera plane: " << cameraPlane.transpose() << std::endl;
+
         cameraPlanes.push_back(cameraPlane);
         lidarPlanes.push_back(lidarPlane);
     }
