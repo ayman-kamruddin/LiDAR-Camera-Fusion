@@ -7,12 +7,15 @@
 CalibrationHandler::CalibrationHandler(const std::vector<std::string>& imageFiles,
                                        const std::vector<std::string>& cloudFiles,
                                        const cv::Mat& cameraMatrix,
-                                       const cv::Mat& distCoeffs)
+                                       const cv::Mat& distCoeffs,
+                                       int checkerboardRows,
+                                       int checkerboardCols,
+                                       float checkerboardSize)
     : imageFiles_(imageFiles),
       cloudFiles_(cloudFiles),
       cameraMatrix_(cameraMatrix),
       distCoeffs_(distCoeffs),
-      imageHandler_(6, 9, 0.079, false, cameraMatrix, distCoeffs),
+      imageHandler_(false, cameraMatrix, distCoeffs),
       cloudHandler_(4.0, -4.0, -1.0, 9.0, 4.0, 1.5, 0.02, 500, false, 0.05, 1.2, 0.1) {}
 
 void CalibrationHandler::run() {
