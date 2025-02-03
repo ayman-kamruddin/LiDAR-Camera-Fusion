@@ -12,7 +12,9 @@ public:
     CloudHandler(double min_bound_x, double min_bound_y, double min_bound_z,
                  double max_bound_x, double max_bound_y, double max_bound_z,
                  double plane_ransac_thresh, int plane_min_points, bool debug,
-                 double cluster_tolerance, double bounding_box_tolerance);
+                 double cluster_tolerance, 
+                 double bounding_box_size,
+                 double bounding_box_tolerance);
 
     Eigen::Vector4d extractPlane(const std::string& cloudFile);
 
@@ -23,6 +25,7 @@ private:
     int plane_min_points_;
     bool debug_;
     double cluster_tolerance_;
+    double bounding_box_size_;
     double bounding_box_tolerance_;
 };
 

@@ -8,16 +8,19 @@
 #include <pcl/segmentation/extract_clusters.h>
 #include <iostream>
 
-CloudHandler::CloudHandler(double min_bound_x, double min_bound_y, double min_bound_z,
-                           double max_bound_x, double max_bound_y, double max_bound_z,
+CloudHandler::CloudHandler(double min_bound_x, double min_bound_y, double min_bound_z, //filtering the point cloud - minimum bounds in your unit of distance 
+                           double max_bound_x, double max_bound_y, double max_bound_z, //filtering the point cloud - maximum bounds in your unit of distance
                            double plane_ransac_thresh, int plane_min_points, bool debug,
-                           double cluster_tolerance, double bounding_box_tolerance)
+                           double cluster_tolerance, 
+                           double bounding_box_size,
+                           double bounding_box_tolerance)
     : min_bound_(min_bound_x, min_bound_y, min_bound_z),
       max_bound_(max_bound_x, max_bound_y, max_bound_z),
       plane_ransac_thresh_(plane_ransac_thresh),
       plane_min_points_(plane_min_points),
       debug_(debug),
       cluster_tolerance_(cluster_tolerance),
+      bounding_box_size_(bounding_box_size),
       bounding_box_tolerance_(bounding_box_tolerance) {}
 
 Eigen::Vector4d CloudHandler::extractPlane(const std::string& cloudFile) {
@@ -87,8 +90,8 @@ Eigen::Vector4d CloudHandler::extractPlane(const std::string& cloudFile) {
         double extentY = maxPt.y - minPt.y;
         double extentZ = maxPt.z - minPt.z;
 
-        // Check each dimension is <= 1.2 + bounding_box_tolerance_
-        if (extentX <= (1.2 + bounding_box_tolerance_) && extentY <= (1.2 + bounding_box_tolerance_) && extentZ <= (1.2 + bounding_box_tolerance_)) {
+        // Check each dimension is <= bounding_box_size_ + bounding_box_tolerance_
+        if (extentX <= (bounding_box_size_ + bounding_box_tolerance_) && extentY <= (bounding_box_size_ + bounding_box_tolerance_) && extentZ <= (bounding_box_size_ + bounding_box_tolerance_)) {
             if (cluster->points.size() > maxClusterSize) {
                 selectedCluster = cluster;
                 maxClusterSize = cluster->points.size();

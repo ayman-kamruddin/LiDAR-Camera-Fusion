@@ -13,7 +13,7 @@ CalibrationHandler::CalibrationHandler(const std::vector<std::string>& imageFile
       cameraMatrix_(cameraMatrix),
       distCoeffs_(distCoeffs),
       imageHandler_(6, 9, 0.079, false, cameraMatrix, distCoeffs),
-      cloudHandler_(4.0, -4.0, -1.0, 9.0, 4.0, 1.5, 0.02, 500, false, 0.05, 0.1) {}
+      cloudHandler_(4.0, -4.0, -1.0, 9.0, 4.0, 1.5, 0.02, 500, false, 0.05, 1.2, 0.1) {}
 
 void CalibrationHandler::run() {
     std::cout << "Running calibration with " << imageFiles_.size() << " image-cloud pairs." << std::endl;

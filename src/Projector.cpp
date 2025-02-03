@@ -76,7 +76,7 @@ void Projector::projectLidarToImage(const std::string& cloudFile,
     if (!cv::imwrite("projected_points.jpg", outputImage)) {
         std::cerr << "Failed to save projected image." << std::endl;
     } else {
-        std::cout << "Projected points image saved as projected_points_colored.jpg" << std::endl;
+        std::cout << "Projected points image saved as projected_points.jpg" << std::endl;
     }
 }
 
