@@ -63,15 +63,9 @@ Eigen::Matrix3d Optimization::optimizeRotation(const std::vector<Eigen::Vector4d
         Eigen::Vector3d lidarNormal  = lidarPlanes[i].head<3>();
         Eigen::Vector3d cameraNormal = cameraPlanes[i].head<3>();
 
-        // OPTIONALLY: Normalize each normal if your data isn't guaranteed normalized.
-        double nL = lidarNormal.norm();
-        double nC = cameraNormal.norm();
-        if (nL > 1e-9) {
-            lidarNormal /= nL;
-         }
-         if (nC > 1e-9) {
-             cameraNormal /= nC;
-         }
+        // Normalize each normal
+        lidarNormal.normalize();
+        cameraNormal.normalize();
 
         // Accumulate
         H += lidarNormal * cameraNormal.transpose();
@@ -121,30 +115,21 @@ Eigen::Vector3d Optimization::optimizeTranslation(const std::vector<Eigen::Vecto
         Eigen::Vector3d cameraNormal = cameraPlanes[i].head<3>();
         double           cameraD     = cameraPlanes[i](3);
 
-        // OPTIONAL: Normalize if not guaranteed
-        double nL = lidarNormal.norm();
-        double nC = cameraNormal.norm();
-        if (nL > 1e-9) {
-             lidarNormal /= nL;
-             lidarD /= nL;  // scale offset by same factor
-         }
-         if (nC > 1e-9) {
-             cameraNormal /= nC;
-             cameraD /= nC;
-         }
+        // Normalize each normal
+        lidarNormal.normalize();
+        cameraNormal.normalize();
 
         // Compute the predicted camera-frame normal via the rotation
         Eigen::Vector3d predictedN_c = rotation * lidarNormal;
 
-        // OPTIONAL: Check direction consistency
-        // If predictedN_c is "the opposite" of cameraNormal, you may flip one set:
+        // Check direction consistency
         if (predictedN_c.dot(cameraNormal) < 0.0) {
             // Flip LiDAR side
-             lidarNormal  = -lidarNormal;
-             lidarD       = -lidarD;
-             // Recompute predictedN_c:
-             predictedN_c = rotation * lidarNormal;
-         }
+            lidarNormal  = -lidarNormal;
+            lidarD       = -lidarD;
+            // Recompute predictedN_c:
+            predictedN_c = rotation * lidarNormal;
+        }
 
         // Single scalar equation: predictedN_c^T * t = lidarD - cameraD
         A.row(i) = predictedN_c.transpose();

@@ -82,9 +82,6 @@ The project requires the following libraries:
 
 - `CMakeLists.txt`: CMake configuration file.
 
-## Issues
-Coordiate transformation in `src/Projector.cpp` (specifically, where I flip the sign of the translation vector's x-component) is ad-hoc and will need to be generalised. I am currently working on a fix.
-
 ## Contributing
 
 Contributions are welcome! Please follow these guidelines:
