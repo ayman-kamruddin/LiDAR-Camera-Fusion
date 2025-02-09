@@ -33,7 +33,7 @@ void Projector::projectLidarToImage(const std::string& cloudFile,
     cv::Rodrigues(rotationMatrix, rvec);
 
     cv::Mat T = (cv::Mat_<double>(3, 1) << 
-        -transformation(0, 3),
+        -transformation(0, 3), // a bit of a hack to get the correct translation. will need to be generalized.
         transformation(1, 3),
         transformation(2, 3));
 

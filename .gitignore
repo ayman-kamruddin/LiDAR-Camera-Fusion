@@ -2,3 +2,4 @@
 /calib_data/
 projected_points.jpg
 transformation.yaml
+calibration_parameters.json

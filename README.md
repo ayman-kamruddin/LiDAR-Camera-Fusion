@@ -59,6 +59,8 @@ The project requires the following libraries:
 
 4. The projected LiDAR points onto the image will be saved as `projected_points.jpg`.
 
+5. The complete calibration parameter set, required to reproduce fused images or colored pointclouds, will be saved as `calibration_parameters.json`.
+
 ## Repository Structure
 
 - `src/`: Contains the source code files.
@@ -79,6 +81,9 @@ The project requires the following libraries:
   - `Projector.h`: Header for `Projector.cpp`.
 
 - `CMakeLists.txt`: CMake configuration file.
+
+## Issues
+Coordiate transformation in `src/Projector.cpp` (specifically, where I flip the sign of the translation vector's x-component) is ad-hoc and will need to be generalised. I am currently working on a fix.
 
 ## Contributing
 
