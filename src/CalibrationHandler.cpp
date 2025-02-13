@@ -2,7 +2,7 @@
 #include "Optimization.h"
 #include <fstream>
 #include <iostream>
-#include <Eigen/Dense>
+#include <Eigen/Dense> // test
 
 CalibrationHandler::CalibrationHandler(const std::vector<std::string>& imageFiles,
                                        const std::vector<std::string>& cloudFiles,
