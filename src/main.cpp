@@ -83,9 +83,9 @@ bool calibrateCamera(const std::vector<std::string>& imageFiles, int checkerboar
 
             // Debug: Visualize corners
             // Uncomment the following lines for debugging:
-            cv::drawChessboardCorners(image, cv::Size(checkerboardCols, checkerboardRows), corners, found);
-            cv::imshow("Checkerboard", image);
-            cv::waitKey(100);
+            // cv::drawChessboardCorners(image, cv::Size(checkerboardCols, checkerboardRows), corners, found);
+            // cv::imshow("Checkerboard", image);
+            // cv::waitKey(100);
         } else {
             std::cerr << "Checkerboard not found in image: " << file << std::endl;
         }
