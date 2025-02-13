@@ -83,9 +83,9 @@ bool calibrateCamera(const std::vector<std::string>& imageFiles, int checkerboar
 
             // Debug: Visualize corners
             // Uncomment the following lines for debugging:
-            // cv::drawChessboardCorners(image, cv::Size(checkerboardCols, checkerboardRows), corners, found);
-            // cv::imshow("Checkerboard", image);
-            // cv::waitKey(100);
+            cv::drawChessboardCorners(image, cv::Size(checkerboardCols, checkerboardRows), corners, found);
+            cv::imshow("Checkerboard", image);
+            cv::waitKey(100);
         } else {
             std::cerr << "Checkerboard not found in image: " << file << std::endl;
         }
@@ -142,9 +142,9 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-        int checkerboardRows = 6; // Update based on your checkerboard
-        int checkerboardCols = 9;
-        float checkerboardSize = 0.079; // Size in meters
+        int checkerboardRows = 8; // Update based on your checkerboard
+        int checkerboardCols = 11;
+        float checkerboardSize = 0.060; // Size in meters
 
         cv::Mat cameraMatrix, distCoeffs;
         if (!calibrateCamera(imageFiles, checkerboardRows, checkerboardCols, checkerboardSize, cameraMatrix, distCoeffs)) {
