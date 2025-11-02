@@ -11,12 +11,14 @@ ImageHandler::ImageHandler(int checkerboardRows, int checkerboardCols, float che
       cameraMatrix_(cameraMatrix),
       distCoeffs_(distCoeffs) {}
 
-Eigen::Vector4d ImageHandler::extractPlane(const std::string& imagePath) {
+PlaneObservation ImageHandler::extractPlane(const std::string& imagePath) {
+    PlaneObservation observation;
+
     // Load the image
     cv::Mat image = cv::imread(imagePath, cv::IMREAD_GRAYSCALE);
     if (image.empty()) {
         std::cerr << "Failed to load image: " << imagePath << std::endl;
-        return Eigen::Vector4d::Zero();
+        return observation;
     }
 
     // Find checkerboard corners
@@ -26,9 +28,7 @@ Eigen::Vector4d ImageHandler::extractPlane(const std::string& imagePath) {
 
     if (!found) {
         std::cerr << "Checkerboard pattern not found in image: " << imagePath << std::endl;
-        
-        return Eigen::Vector4d::Zero();
-
+        return observation;
     }
 
     // Refine corner locations
@@ -58,7 +58,7 @@ Eigen::Vector4d ImageHandler::extractPlane(const std::string& imagePath) {
 
     if (!success) {
         std::cerr << "Failed to solve PnP for image: " << imagePath << std::endl;
-        return Eigen::Vector4d::Zero();
+        return observation;
     }
 
     // Convert rotation vector to rotation matrix
@@ -67,15 +67,43 @@ Eigen::Vector4d ImageHandler::extractPlane(const std::string& imagePath) {
 
     // Extract the plane normal in the camera frame
     cv::Mat normalCamera = rotationMatrix * (cv::Mat_<double>(3, 1) << 0.0, 0.0, 1.0);
-    Eigen::Vector3d planeNormal(normalCamera.at<double>(0, 0), normalCamera.at<double>(1, 0), normalCamera.at<double>(2, 0));
-    double planeD = -planeNormal.dot(Eigen::Vector3d(tvec.at<double>(0, 0), tvec.at<double>(1, 0), tvec.at<double>(2, 0)));
+    Eigen::Vector3d planeNormal(normalCamera.at<double>(0, 0),
+                                normalCamera.at<double>(1, 0),
+                                normalCamera.at<double>(2, 0));
 
-    // Construct the plane equation
-    Eigen::Vector4d plane(planeNormal(0), planeNormal(1), planeNormal(2), planeD);
+    Eigen::Vector3d tEigen(tvec.at<double>(0, 0),
+                           tvec.at<double>(1, 0),
+                           tvec.at<double>(2, 0));
 
-    if (debugMode_) {
-        std::cout << "Extracted plane: " << plane.transpose() << std::endl;
+    double planeD = -planeNormal.dot(tEigen);
+
+    double norm = planeNormal.norm();
+    if (norm > 1e-9) {
+        planeNormal /= norm;
+        planeD /= norm;
     }
 
-    return plane;
+    // Construct the plane equation
+    observation.plane = Eigen::Vector4d(planeNormal(0), planeNormal(1), planeNormal(2), planeD);
+
+    // Compute the checkerboard center in camera coordinates for translation alignment
+    double centerX = 0.5 * (checkerboardCols_ - 1) * checkerboardSize_;
+    double centerY = 0.5 * (checkerboardRows_ - 1) * checkerboardSize_;
+    Eigen::Vector3d boardCenterObject(centerX, centerY, 0.0);
+
+    Eigen::Matrix3d rotationEigen;
+    for (int r = 0; r < 3; ++r) {
+        for (int c = 0; c < 3; ++c) {
+            rotationEigen(r, c) = rotationMatrix.at<double>(r, c);
+        }
+    }
+
+    observation.centroid = rotationEigen * boardCenterObject + tEigen;
+
+    if (debugMode_) {
+        std::cout << "Extracted plane: " << observation.plane.transpose()
+                  << " | centroid: " << observation.centroid.transpose() << std::endl;
+    }
+
+    return observation;
 }

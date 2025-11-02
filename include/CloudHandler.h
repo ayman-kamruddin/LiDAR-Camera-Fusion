@@ -6,6 +6,7 @@
 #include <vector>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include "PlaneObservation.h"
 
 class CloudHandler {
 public:
@@ -16,7 +17,7 @@ public:
                  double bounding_box_size,
                  double bounding_box_tolerance);
 
-    Eigen::Vector4d extractPlane(const std::string& cloudFile);
+    PlaneObservation extractPlane(const std::string& cloudFile);
 
 private:
     Eigen::Vector3d min_bound_;

@@ -21,6 +21,8 @@ void CalibrationHandler::run() {
 
     std::vector<Eigen::Vector4d> cameraPlanes;
     std::vector<Eigen::Vector4d> lidarPlanes;
+    std::vector<Eigen::Vector3d> cameraCentroids;
+    std::vector<Eigen::Vector3d> lidarCentroids;
 
     for (size_t i = 0; i < imageFiles_.size(); ++i) {
         std::cout << "Processing pair " << i + 1 << " of " << imageFiles_.size() << std::endl;
@@ -34,17 +36,19 @@ void CalibrationHandler::run() {
             continue;
         }
 
-        Eigen::Vector4d cameraPlane = imageHandler_.extractPlane(imageFiles_[i]);
-        Eigen::Vector4d lidarPlane = cloudHandler_.extractPlane(cloudFiles_[i]);
+        PlaneObservation cameraObservation = imageHandler_.extractPlane(imageFiles_[i]);
+        PlaneObservation lidarObservation = cloudHandler_.extractPlane(cloudFiles_[i]);
 
-        if (cameraPlane.isZero() || lidarPlane.isZero()) {
+        if (!cameraObservation.isValid() || !lidarObservation.isValid()) {
             std::cerr << "Failed to extract valid planes for pair: " << imageFiles_[i]
                       << " and " << cloudFiles_[i] << std::endl;
             continue;
         }
 
-        cameraPlanes.push_back(cameraPlane);
-        lidarPlanes.push_back(lidarPlane);
+        cameraPlanes.push_back(cameraObservation.plane);
+        lidarPlanes.push_back(lidarObservation.plane);
+        cameraCentroids.push_back(cameraObservation.centroid);
+        lidarCentroids.push_back(lidarObservation.centroid);
     }
 
     if (cameraPlanes.size() < 3 || lidarPlanes.size() < 3) {
@@ -54,6 +58,17 @@ void CalibrationHandler::run() {
 
     try {
         transformation_ = Optimization::run(lidarPlanes, cameraPlanes);
+
+        if (!cameraCentroids.empty() && cameraCentroids.size() == lidarCentroids.size()) {
+            Eigen::Vector3d translationSum = Eigen::Vector3d::Zero();
+            Eigen::Matrix3d rotation = transformation_.block<3, 3>(0, 0);
+            for (size_t i = 0; i < cameraCentroids.size(); ++i) {
+                translationSum += cameraCentroids[i] - rotation * lidarCentroids[i];
+            }
+            Eigen::Vector3d refinedTranslation = translationSum / static_cast<double>(cameraCentroids.size());
+            transformation_.block<3, 1>(0, 3) = refinedTranslation;
+            std::cout << "Refined translation (centroid alignment): " << refinedTranslation.transpose() << std::endl;
+        }
 
         std::cout << "Calibration completed successfully!" << std::endl;
         std::cout << "Computed transformation matrix (LiDAR to Camera):\n" << transformation_ << std::endl;

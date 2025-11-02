@@ -23,14 +23,15 @@ CloudHandler::CloudHandler(double min_bound_x, double min_bound_y, double min_bo
       bounding_box_size_(bounding_box_size),
       bounding_box_tolerance_(bounding_box_tolerance) {}
 
-Eigen::Vector4d CloudHandler::extractPlane(const std::string& cloudFile) {
+PlaneObservation CloudHandler::extractPlane(const std::string& cloudFile) {
+    PlaneObservation observation;
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>());
     pcl::PointCloud<pcl::PointXYZ>::Ptr filteredCloud(new pcl::PointCloud<pcl::PointXYZ>());
 
     // Load the point cloud
     if (pcl::io::loadPCDFile(cloudFile, *cloud) == -1) {
         std::cerr << "Failed to load point cloud: " << cloudFile << std::endl;
-        return Eigen::Vector4d::Zero();
+        return observation;
     }
 
     // Pass-through filter
@@ -52,7 +53,7 @@ Eigen::Vector4d CloudHandler::extractPlane(const std::string& cloudFile) {
 
     if (filteredCloud->points.size() < plane_min_points_) {
         std::cerr << "Not enough points after filtering for plane extraction." << std::endl;
-        return Eigen::Vector4d::Zero();
+        return observation;
     }
 
     // Clustering
@@ -70,7 +71,7 @@ Eigen::Vector4d CloudHandler::extractPlane(const std::string& cloudFile) {
 
     if (clusterIndices.empty()) {
         std::cerr << "No clusters found in the filtered cloud." << std::endl;
-        return Eigen::Vector4d::Zero();
+        return observation;
     }
 
     // Select the largest valid cluster
@@ -101,7 +102,7 @@ Eigen::Vector4d CloudHandler::extractPlane(const std::string& cloudFile) {
 
     if (selectedCluster->points.empty()) {
         std::cerr << "No valid clusters found." << std::endl;
-        return Eigen::Vector4d::Zero();
+        return observation;
     }
 
     // Plane fitting using RANSAC
@@ -117,7 +118,7 @@ Eigen::Vector4d CloudHandler::extractPlane(const std::string& cloudFile) {
 
     if (inliers->indices.size() < plane_min_points_) {
         std::cerr << "Failed to extract plane from the selected cluster." << std::endl;
-        return Eigen::Vector4d::Zero();
+        return observation;
     }
 
     // Debug output
@@ -127,11 +128,39 @@ Eigen::Vector4d CloudHandler::extractPlane(const std::string& cloudFile) {
     }
 
     // Return plane coefficients
-    if (coefficients->values.size() == 4) {
-        return Eigen::Vector4d(coefficients->values[0], coefficients->values[1],
-                               coefficients->values[2], coefficients->values[3]);
-    } else {
+    if (coefficients->values.size() != 4) {
         std::cerr << "Invalid plane coefficients." << std::endl;
-        return Eigen::Vector4d::Zero();
+        return observation;
     }
+
+    Eigen::Vector3d planeNormal(coefficients->values[0],
+                                coefficients->values[1],
+                                coefficients->values[2]);
+    double planeD = coefficients->values[3];
+
+    double norm = planeNormal.norm();
+    if (norm > 1e-9) {
+        planeNormal /= norm;
+        planeD /= norm;
+    }
+
+    observation.plane = Eigen::Vector4d(planeNormal(0), planeNormal(1), planeNormal(2), planeD);
+
+    Eigen::Vector3d centroid = Eigen::Vector3d::Zero();
+    if (!inliers->indices.empty()) {
+        for (const auto& idx : inliers->indices) {
+            const auto& pt = selectedCluster->points[idx];
+            centroid += Eigen::Vector3d(pt.x, pt.y, pt.z);
+        }
+        centroid /= static_cast<double>(inliers->indices.size());
+    } else {
+        for (const auto& pt : selectedCluster->points) {
+            centroid += Eigen::Vector3d(pt.x, pt.y, pt.z);
+        }
+        centroid /= static_cast<double>(selectedCluster->points.size());
+    }
+
+    observation.centroid = centroid;
+
+    return observation;
 }

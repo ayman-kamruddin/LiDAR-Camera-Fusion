@@ -91,8 +91,6 @@ bool calibrateCamera(const std::vector<std::string>& imageFiles, int checkerboar
         }
     }
 
-    cv::destroyAllWindows();
-
     if (imagePoints.empty()) {
         std::cerr << "No valid checkerboard images found for calibration." << std::endl;
         return false;

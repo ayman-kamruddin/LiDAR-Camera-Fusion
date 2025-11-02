@@ -1,6 +1,6 @@
 project(LidarCameraCalibration)
 
-set(OpenCV_DIR "/home/ayman/build/")
+set(OpenCV_DIR "/home/ayman/Programs/opencv_build")
 
 cmake_minimum_required(VERSION 3.10)
 
