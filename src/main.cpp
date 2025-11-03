@@ -2,11 +2,15 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <filesystem>
+#include <algorithm>
 #include <opencv2/opencv.hpp>
 #include <nlohmann/json.hpp> // Include the JSON library (https://github.com/nlohmann/json)
 #include "DataLoader.h"
 #include "CalibrationHandler.h"
 #include "Projector.h"
+
+namespace fs = std::filesystem;
 
 // Function to save calibration data in JSON format
 void saveCalibrationData(const cv::Mat& cameraMatrix, const cv::Mat& distCoeffs,
@@ -167,10 +171,56 @@ int main(int argc, char** argv) {
         }
         saveCalibrationData(cameraMatrix, distCoeffs, rotationMatrix, translationVector, "calibration_parameters.json");
 
-        // Project LiDAR points to the image for the first pair
+        // Project LiDAR points to the images for all available pairs and colorize the point clouds
         if (!imageFiles.empty() && !cloudFiles.empty()) {
-            Projector::projectLidarToImage(cloudFiles[0], imageFiles[0], transformation, cameraMatrix, distCoeffs);
-            std::cout << "Projected LiDAR points onto the image successfully." << std::endl;
+            fs::path projectedImageDir = fs::path(dataPath) / "projected_points";
+            fs::path colorizedCloudDir = fs::path(dataPath) / "colorized_pointclouds";
+
+            std::error_code ec;
+            fs::create_directories(projectedImageDir, ec);
+            if (ec) {
+                std::cerr << "Failed to create projected points directory: " << ec.message() << std::endl;
+                return 1;
+            }
+
+            ec.clear();
+            fs::create_directories(colorizedCloudDir, ec);
+            if (ec) {
+                std::cerr << "Failed to create colorized point cloud directory: " << ec.message() << std::endl;
+                return 1;
+            }
+
+            const std::size_t pairCount = std::min(imageFiles.size(), cloudFiles.size());
+            for (std::size_t i = 0; i < pairCount; ++i) {
+                fs::path imagePath = imageFiles[i];
+                fs::path cloudPath = cloudFiles[i];
+
+                std::string baseName = imagePath.stem().string();
+                if (baseName.empty()) {
+                    baseName = "pair_" + std::to_string(i);
+                }
+
+                fs::path projectedImagePath = projectedImageDir / (baseName + "_projected.jpg");
+                Projector::projectLidarToImage(cloudPath.string(),
+                                               imagePath.string(),
+                                               transformation,
+                                               cameraMatrix,
+                                               distCoeffs,
+                                               projectedImagePath.string());
+
+                fs::path colorizedCloudPath = colorizedCloudDir / (baseName + "_colorized.pcd");
+                Projector::projectLidarToImageAndColorize(cloudPath.string(),
+                                                          imagePath.string(),
+                                                          transformation,
+                                                          cameraMatrix,
+                                                          distCoeffs,
+                                                          colorizedCloudPath.string());
+            }
+
+            std::cout << "Projected LiDAR points saved for " << pairCount
+                      << " pairs in " << projectedImageDir << std::endl;
+            std::cout << "Colorized point clouds saved for " << pairCount
+                      << " pairs in " << colorizedCloudDir << std::endl;
         }
 
     } catch (const std::exception& e) {

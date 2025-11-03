@@ -1,5 +1,13 @@
 /build/
-/calib_data/
+calib_data/images/
+calib_data/pointclouds/
+calib_data/projected_points/
+calib_data/colorized_pointclouds/
+/calib_data/*.json
+/calib_data/*.yaml
+/calib_data/*.pcd
+/calib_data/*.jpg
+/calib_data/*.png
 projected_points.jpg
 transformation.yaml
 calibration_parameters.json
