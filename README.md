@@ -121,3 +121,5 @@ Contributions are welcome! Please follow these guidelines:
 5. Create a pull request to the main repository.
 
 For any issues or questions, please open an issue on GitHub.
+
+You can also check out the accompanying Medium.com [post](https://medium.com/@aymanbinkamruddin/lidar-camera-calibration-in-c-01046be829db).
