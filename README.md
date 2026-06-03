@@ -61,6 +61,34 @@ The project requires the following libraries:
 
 5. The complete calibration parameter set, required to reproduce fused images or colored pointclouds, will be saved as `calibration_parameters.json`.
 
+## Demo Results
+
+The following examples show the full visual output of the calibration workflow, starting from raw sensor inputs and ending with fused representations.
+
+Raw RGB image:
+
+This is the original camera frame used as the visual reference for calibration. Checkerboard corners and image-plane geometry are extracted from this view.
+
+![Raw RGB](demo_images/raw_rgb.webp)
+
+Raw LiDAR point cloud:
+
+This is the uncolored point cloud captured by the LiDAR sensor before fusion. Planar structures from this cloud are used to estimate geometric constraints.
+
+![Raw Point Cloud](demo_images/raw_pcd.webp)
+
+Fused camera-LiDAR image:
+
+After calibration, LiDAR points are projected into the camera image using the estimated extrinsic transformation. Correct alignment indicates accurate cross-sensor registration.
+
+![Fused Image](demo_images/fused_image.webp)
+
+Fused colored point cloud:
+
+Each LiDAR point is assigned color from the corresponding camera pixel after projection. This produces a colorized 3D reconstruction that visually validates the fusion quality.
+
+![Fused Point Cloud](demo_images/fused_pcd.webp)
+
 ## Repository Structure
 
 - `src/`: Contains the source code files.

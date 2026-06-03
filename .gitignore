@@ -11,3 +11,6 @@ calib_data/colorized_pointclouds/
 projected_points.jpg
 transformation.yaml
 calibration_parameters.json
+
+# macOS Finder metadata
+.DS_Store
